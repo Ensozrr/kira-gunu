@@ -260,6 +260,34 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .tstep{margin-left:auto;font-size:12px;color:var(--muted)}
 .tback{background:var(--panel2);padding:9px 12px;border-radius:10px;font-weight:800;font-size:13px}
 .tnext{background:var(--gold);color:#2a1d00;font-weight:900;padding:9px 16px;border-radius:10px;font-size:14px}
+#hClock,#hRep,#log{display:none}
+.panel .goal{display:none!important}
+.chip.bell{position:relative;font-size:16px;padding:5px 9px}
+.chip.bell span{position:absolute;top:-5px;right:-5px;background:var(--bad);color:#fff;font-size:10px;border-radius:99px;padding:1px 5px}
+.tasks{flex:1 1 auto;min-height:100px;max-height:40dvh;height:0;overflow-y:auto;display:flex;flex-direction:column;gap:6px;overscroll-behavior:contain}
+.thead{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;font-weight:900;color:var(--muted);flex:none;min-height:26px}
+.collectAll{background:var(--gold);color:#2a1d00;border-radius:99px;padding:5px 11px;font-size:12px;font-weight:900;white-space:nowrap}
+.tcard{display:flex;gap:10px;align-items:center;background:var(--panel);border-radius:12px;padding:9px 11px;text-align:left;width:100%;flex:none;border-left:4px solid var(--panel2)}
+.tcard.req{border-left-color:var(--bad)}
+.tcard .e{font-size:22px}.tcard .t{flex:1;font-size:13px}.tcard small{display:block;color:var(--muted);font-size:11px}
+.tcard .rq{color:var(--bad);font-weight:800}
+.tcard .go{font-size:22px;color:var(--muted)}
+.tempty{background:var(--panel);border-radius:12px;padding:12px;font-size:13px;color:var(--muted);text-align:center;flex:none}
+.coin{position:absolute;top:3px;left:50%;transform:translateX(-50%);z-index:8;background:#fff;color:#2a1d00;border-radius:99px;padding:3px 9px;font-size:12px;font-weight:900;box-shadow:0 3px 8px #0006;white-space:nowrap;animation:cbob 1.3s ease-in-out infinite;cursor:pointer;line-height:1.2}
+.coin.alert{background:var(--bad);color:#fff;left:4px;transform:none;animation:abob 1s ease-in-out infinite;padding:3px 7px}
+@keyframes cbob{50%{transform:translate(-50%,-4px)}}
+@keyframes abob{50%{transform:translateY(-4px)}}
+.bub{position:absolute;top:3px;left:50%;transform:translateX(-50%);display:flex;gap:4px;z-index:8;animation:cbob 1.3s ease-in-out infinite;white-space:nowrap}
+.bub .coin{position:static;transform:none;animation:none}
+.shop .bub{top:-18px}
+.flyc{position:fixed;z-index:60;font-size:22px;pointer-events:none;transition:left .65s cubic-bezier(.5,-0.3,.6,1),top .65s cubic-bezier(.5,-0.3,.6,1),opacity .65s}
+.lot.locked{opacity:.6;filter:grayscale(1);cursor:default}
+.lockbox{height:130px;background:#9aa0a8;border-radius:6px 6px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;color:#fff;gap:4px}
+.lockbox small{font-size:11px;font-weight:800;text-align:center;padding:0 6px}
+.bline{background:var(--panel2);border-radius:10px;padding:8px 10px;font-size:13px;display:flex;flex-direction:column;gap:2px;flex:none}
+.bline b{font-size:11px;color:var(--muted)}
+.hist2 div{border-bottom:1px solid #ffffff10;padding:4px 0;font-size:13px}
+.hist2 .g{color:var(--good)}.hist2 .b{color:var(--bad)}.hist2 .m{color:var(--muted)}.hist2 .s{color:#8fd3ff}
 .tags{display:flex;gap:6px;flex-wrap:wrap}.tags span{background:var(--bg);border-radius:99px;padding:3px 9px;font-size:12px;color:var(--muted)}
 /* giriş */
 #start{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;text-align:center;background:radial-gradient(120% 70% at 50% 0%,#33467e,var(--bg) 70%)}
@@ -303,6 +331,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     <div class="chip" id="hClock">☀️ 08:00</div>
     <div class="chip" id="hMonth">Mart</div>
     <div class="chip" id="hRep">⭐ 50</div>
+    <button class="chip bell" id="hBell" onclick="openBell()">🔔<span id="hBellN" style="display:none"></span></button>
     <button class="menuBtn" onclick="openMenu()">☰</button>
   </div>
   <div class="tabs"><button id="tabHomes" class="on" onclick="setView('homes')">🏠 Evler</button><button id="tabShops" onclick="setView('shops')">🏪 Dükkanlar</button></div>
@@ -325,10 +354,11 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     <div class="goal" id="homeGoal">🏠 <span id="gTxt"></span><div class="prog"><i id="gBar"></i></div><span id="gInc"></span></div>
     <button class="qline" id="qLine" onclick="openQuests()"></button>
     <div class="log" id="log"></div>
+    <div class="tasks" id="tasks"></div>
     <div class="actions">
-      <button class="btn sec" id="bAuto" onclick="toggleAuto()">⏩</button>
+      <button class="btn sec" id="bHist" onclick="openHistory()" aria-label="Geçmiş">📜</button>
       <button class="btn sec" id="bQuest" onclick="openQuests()">📋<span class="qcount" id="qCount"></span></button>
-      <button class="btn" id="bNext" onclick="nextMonth()">Sonraki Ay ▶</button>
+      <button class="btn" id="bNext" onclick="nextMonth()">Ayı bitir ▶</button>
     </div>
   </div>
 </div>
@@ -497,13 +527,13 @@ function newGame(){
   document.getElementById('start').style.display='none';
   log('Mahalleye hoş geldin! Gül Apartmanı\'nda bir dairen ve No: 7\'de bir gecekondun var.','m');
   log(`${t.ic} ${t.name} (${t.job}) dairende oturuyor, kirası ${fmt(t.rent)}.`,'g');
-  log('Üst katlar daha pahalı ama kirası da yüksek. Sağa kaydır: Lale Rezidans\'ın teraslı çatı katı var.','');
+  log('Her yıl mahallede yeni bir bina açılır. Üst katlar daha pahalı ama kirası da yüksek.','');
   if(TEST_LEVEL10){ S.month=119; S.cash=600000; log('🧪 TEST MODU: Ocak 2010, seviye 10 ile başladın, kasada 600.000 ₺ var. Dükkanlar açık.','s'); }
   else log('🌸 İlkbahar. Yazın klima, kışın kombi ve çatı sızıntısı derdi olur.','s');
+  S.start=S.month; S.unlocked=unlockedCount();
+  addTask({k:'find',u:g});            // ilk iş: gecekonduya kiracı (kart olarak)
   render();
-  busy=true;
-  setTimeout(()=>maybeTour(VIEW).then(()=>ask({ico:'🔑',title:'İlk işin: kiracı seç',text:'Gecekondun boş duruyor. Boş ev para kazandırmaz, ama yanlış kiracı daha çok zarar ettirir. Adaylara bak, istersen referanslarını kontrol et.',
-       choices:[{t:'Adaylara bak'}]})).then(()=>chooseTenant(g)).then(()=>{busy=false;save();render();}),0);
+  setTimeout(()=>maybeTour(VIEW),0);
 }
 function continueGame(){ try{ S=JSON.parse(localStorage.getItem(SAVE)); if(!S||!S.blds) throw 0; }catch(e){ return newGame(); }
   indexUnits(); ensureDefaults(); document.getElementById('start').style.display='none'; S.auto=false; render(); setTimeout(()=>maybeTour(VIEW),0); }
@@ -584,7 +614,18 @@ function applySeason(){
 
 // ================= AYLIK DÖNGÜ =================
 async function nextMonth(){
-  if(busy||S.over) return; busy=true; document.getElementById('bNext').disabled=true;
+  if(busy||S.over) return;
+  if(!S._fast && S.tasks.some(x=>x.req&&taskValid(x))){ toast('Önce zorunlu işleri bitir'); return; }
+  busy=true; document.getElementById('bNext').disabled=true;
+  try{ await nextMonth0(); } finally { busy=false; render(); }
+}
+async function nextMonth0(){
+  // süresi dolan isteğe bağlı işler: varsayılan seçimle kendiliğinden kapanır, 🔔'a yazılır
+  for(const tk of S.tasks.filter(x=>!x.req && S.month-x.at>=1)){
+    S.tasks=S.tasks.filter(x=>x!==tk); if(!taskValid(tk)) continue;
+    const d=TASK_DEFAULT[tk.k]; if(d!==undefined) await autoResolve(taskEvent(tk),d,false);
+  }
+  S._newCoins=0;
   if(!S._fast) await passDay();
   const prevSeason=season();
   S.month++;
@@ -593,7 +634,9 @@ async function nextMonth(){
   if(sn!==prevSeason) log({spring:'🌸 İlkbahar geldi. Ara sıra yağmur olur.',summer:'☀️ Yaz geldi! Sıcaklar bastırınca kiracılar klima isteyebilir, en çok da üst katlar.',autumn:'🍂 Sonbahar geldi. Yağmurlar başlıyor, en üst katlarda çatı sızıntılarına dikkat.',winter:'❄️ Kış geldi. Kar ve yağmur çatıları zorlar, kombiler bozulabilir.'}[sn],'s');
   if(S.weather!=='clear') log(S.weather==='snow'?'❄️ Bu ay bol kar yağdı.':'🌧️ Bu ay yağmurlu geçti.','s');
   let inc=0, exp=0; const ev=[];
-  const bInc={}, addRent=(u,a)=>{ inc+=a; bInc[u.b]=(bInc[u.b]||0)+a; };
+  const bInc={}, addRent=(u,a)=>{ inc+=a; bInc[u.b]=(bInc[u.b]||0)+a;
+    if(S._fast||mgrOf(u)) S.cash+=a; else { u.coins=(u.coins||0)+a; S._newCoins+=a; } };   // kira evin üstünde 💰 baloncuk olarak birikir (yöneticili binada yönetici toplar)
+  { const ub=unlockedCount(); if(ub>(S.unlocked||0)){ S.unlocked=ub; const nb=S.blds[ub-1]; log(`🏙️ Mahallede yeni bir bina açıldı: ${nb.name}`,'g'); if(!S._fast) bell(`🏙️ Mahallede yeni bir bina açıldı: ${nb.name}`); } }
   if(calM()===0){ const lv=level(), bonus=2500*lv; S.cash+=bonus; log(`🏅 ${year()} yılına girdin: Seviye ${lv}! Yeni yıl bonusu +${fmt(bonus)}`,'g'); ev.push({k:'levelup'}); }
   for(const u of owned()){
     exp+=upkeep(u);
@@ -634,25 +677,30 @@ async function nextMonth(){
   if(sn==='winter'){ const heat=r100(owned().filter(u=>!u.tenant).length*600); if(heat){ exp+=heat; log(`Boş evlerin donmaması için kalorifer gideri: ${fmt(heat)}`,'b'); } }
   if(S.crisis>0) S.crisis--;
   if(Math.random()<0.3) ev.unshift({k:pick(['metro','crisis','bargain','paint','inspect','roof','quake','gift'])});
-  for(const u of units()){ if(u.owned) continue;
+  for(const u of units()){ if(u.owned||!bldOpen(S.blds[u.b])) continue;
     if(u.sale){ if(--u.sale.left<=0){ u.sale=null; log(`${uname(u)} başkasına satıldı.`,'m'); } }
     else if(Math.random()<0.045){ u.sale={price:r1k(value(u)*rand(.88,1.15)), left:Math.round(rand(2,5))}; log(`${TY(u).e} ${uname(u)} satılığa çıktı: ${fmt(u.sale.price)}`,''); }
   }
-  S.cash+=inc-exp; S.yearRent=(S.yearRent||0)+inc;
+  S.cash-=exp; S.yearRent=(S.yearRent||0)+inc;
   shopsMonth(ev);
   if(calM()===11){ ev.unshift({k:'repyear'}); ev.unshift({k:'maliye'}); }   // her Aralık: maliye denetimi + itibar raporu
   log(`Kira geliri ${fmt(inc)}, giderler ${fmt(exp)} → <b>${inc-exp>=0?'+':''}${fmt(inc-exp)}</b>`, inc-exp>=0?'g':'b');
   render();
   ev.sort((a,b)=>(a.k==='find'||a.k==='sh_find')-(b.k==='find'||b.k==='sh_find'));
-  const seen=new Set();
+  const seen=new Set(); let newTasks=0;
   for(const e of ev){ if(S.over)break; if(e.u && !e.u.owned) continue; if(e.sh && !e.sh.owned) continue; const key=e.k+(e.u?e.u.id:'')+(e.sh?'s'+e.sh.id:''); if(seen.has(key)) continue; seen.add(key);
-    if(e.u && S.blds[e.u.b].mgr) await mgrHandle(e); else await handle(e); render(); }
-  if(S.cash<0){ S.debt++; log(`⚠️ Kasan ekside! ${3-S.debt} ay içinde toparlamazsan iflas edersin.`,'b');
+    if(e.u && S.blds[e.u.b].mgr) await mgrHandle(e);
+    else if(S._fast) await handle(e);
+    else if(TASK_INFO.has(e.k)) await autoResolve(e,0,true);   // sadece bilgi veren olaylar 🔔'a
+    else if(addTask(e)) newTasks++;                            // karar gerekenler "Bu ay yapılacaklar" kartı
+  }
+  if(S.cash+coinTotal()<0){ S.debt++; log(`⚠️ Kasan ekside! ${3-S.debt} ay içinde toparlamazsan iflas edersin.`,'b'); if(!S._fast) bell(`⚠️ Kasan ekside! ${3-S.debt} ay içinde toparlamazsan iflas edersin.`);
     if(S.debt>=3) return gameOver(); } else S.debt=0;
-  save(); busy=false; render();
-  if(S.auto) setTimeout(()=>{ if(S.auto) nextMonth(); },500);
+  if(!S._fast){ for(let i=MQ.length-1;i>=0;i--) if(MQ[i].title.startsWith('📅')) MQ.splice(i,1);   // eski ay bantlarını at
+    MQ.push({title:`📅 ${MONTHS[calM()]} ${year()}`,raw:`${S._newCoins?`💰 ${fmt(S._newCoins)} kira toplanmayı bekliyor`:'Bu ay toplanacak kira yok'}${newTasks?` · 📝 ${newTasks} yeni iş`:''}`}); if(!mBusy) nextNote(); }
+  save();
 }
-function toggleAuto(){ S.auto=!S.auto; render(); if(S.auto&&!busy) nextMonth(); }
+
 
 // ================= OLAYLAR =================
 async function handle(e){ await handle0(e); if(S._pendingFind){ const u=S._pendingFind; S._pendingFind=null; await chooseTenant(u); } }
@@ -750,7 +798,7 @@ function handle0(e){
     text:'Belediye mahalleye metro istasyonu açıyor. Ev değerleri %10, yeni kiralar %8 artacak.',choices:[{t:'Harika!',fn:()=>{S.metro=true;log('Metro geldi, mahalle değerlendi!','g');}}]});
   case 'crisis': return ask({ico:'📉',title:'Ekonomik dalgalanma',text:'4 ay boyunca kiracılar kirayı daha zor ödeyecek.',choices:[{t:'Kemerleri sık',fn:()=>{S.crisis=4;log('Ekonomik dalgalanma başladı.','b');}}]});
   case 'bargain': {
-    const c=units().filter(x=>!x.owned&&!x.sale); if(!c.length) return P; const X=pick(c), price=r1k(value(X)*.7);
+    const c=units().filter(x=>!x.owned&&!x.sale&&bldOpen(S.blds[x.b])); if(!c.length) return P; const X=pick(c), price=r1k(value(X)*.7);
     return ask({ico:'👵',title:'Acil satış fırsatı',text:`Komşu Nazmiye teyze kızının yanına taşınıyor. ${uname(X)} adresindeki evini piyasanın altında, ${fmt(price)}'ye satmak istiyor. Teklif sadece bu ay geçerli.`,
       choices:[{t:'Satın al',sub:S.cash>=price?'Hemen sahip ol':'Paran yetmiyor',fn:()=>{ if(S.cash>=price) buy(X,price,true); else toast('Paran yetmiyor'); }},{t:'İlgilenmiyorum'}]}); }
   case 'paint': { const c=owned().filter(x=>x.tenant&&x.tenant.care>.6); if(!c.length) return P; const X=pick(c);
@@ -785,13 +833,13 @@ function moveOut(u,reason){
   if(S._fast) return;
   MOVING.push({id:u.id,t,reason,at:Date.now()});
   if(S.blds[u.b].mgr) mgrNote(S.blds[u.b],`${uname(u)}: ${t.name} taşındı · ${reason}`);
-  else { MQ.push({title:`📦 ${t.name} taşınıyor`,reason}); if(!mBusy) nextNote(); }
+  else bell(`📦 ${t.name} taşındı (${uname(u)}). Neden: ${reason}`);
   setTimeout(()=>{ MOVING=MOVING.filter(m=>Date.now()-m.at<5000); lastStreet=''; render(); },5200);
 }
 function nextNote(){
   const el=document.getElementById('moveNote'), n=MQ.shift();
   if(!n){ mBusy=false; el.classList.remove('on'); return; }
-  mBusy=true; el.innerHTML=`<b>${n.title}</b><span>Neden: ${n.reason}</span>`; el.classList.add('on');
+  mBusy=true; el.innerHTML=`<b>${n.title}</b><span>${n.raw!=null?n.raw:'Neden: '+n.reason}</span>`; el.classList.add('on');
   setTimeout(()=>{ el.classList.remove('on'); setTimeout(nextNote,350); },4200);
 }
 
@@ -911,9 +959,11 @@ function ensureDefaults(){
   if(!had){ S.stats.bought=Math.max(0,owned().length-2); S.stats.ac=owned().filter(u=>u.ac).length; S.stats.insul=owned().filter(u=>u.insul).length; }  // eski kayıtlar
   S.qDone=S.qDone||[]; S.badges=S.badges||[];
   S.mgrLog=S.mgrLog||[]; S.mgrNew=S.mgrNew||0;
+  if(S.start==null) S.start=S.month; S.tasks=S.tasks||[]; S.taskSeq=S.taskSeq||0; S.bell=S.bell||[]; S.bellNew=S.bellNew||0; S.auto=false;
+  if(!S.unlocked) S.unlocked=unlockedCount();
   if(!S.shops) S.shops=makeShops(); S.yearShop=S.yearShop||0; S.stats.shopsBought=S.stats.shopsBought||0;
 }
-function award(id){ if(S.badges.includes(id)) return; S.badges.push(id); const b=BADGES[id]; log(`🏅 Rozet kazandın: ${b.e} ${b.n}`,'g'); toast(`Rozet: ${b.e} ${b.n}`); }
+function award(id){ if(S.badges.includes(id)) return; S.badges.push(id); const b=BADGES[id]; log(`🏅 Rozet kazandın: ${b.e} ${b.n}`,'g'); if(!S._fast) bell(`🏅 Rozet kazandın: ${b.e} ${b.n} – ${b.d}`); }
 const activeQuests=()=>QUESTS.filter(q=>!S.qDone.includes(q.id)).slice(0,3);
 function checkProgress(){
   if(!S||!S.stats) return;
@@ -1016,16 +1066,17 @@ function shopMoveOut(sh,reason){
   const t=sh.tenant; if(!t) return; sh.tenant=null; sh.vacant=0; sh.lastWhy=reason;
   log(`📦 ${t.name} dükkânı boşalttı (${shName(sh)}). Neden: ${reason}`,'b');
   if(S._fast) return;
-  SHMOV[sh.id]=Date.now(); MQ.push({title:`📦 ${t.name} dükkânı boşaltıyor`,reason}); if(!mBusy) nextNote();
+  SHMOV[sh.id]=Date.now(); bell(`📦 ${t.name} dükkânı boşalttı (${shName(sh)}). Neden: ${reason}`);
   setTimeout(()=>{ lastMap=''; render(); },5200);
 }
 
 // ---- aylık dükkan hesabı ----
 function shopsMonth(ev){
   let si=0, se=0; const own=S.shops.filter(x=>x.owned); if(!own.length) return;
+  const pay=(sh,a)=>{ if(a<0){ S.cash+=a; return; } if(S._fast) S.cash+=a; else { sh.coins=(sh.coins||0)+a; S._newCoins=(S._newCoins||0)+a; } };
   for(const sh of own){
     if(sh.mode==='self'&&sh.type){
-      const r=shopSelfMonth(sh); si+=r.rev; se+=r.cost; sh.lastNet=r.net; sh.lastRev=r.rev; sh.lastCost=r.cost; sh.hist=(sh.hist||[]).concat(r.net).slice(-6);
+      const r=shopSelfMonth(sh); si+=r.rev; se+=r.cost; pay(sh,r.net); sh.lastNet=r.net; sh.lastRev=r.rev; sh.lastCost=r.cost; sh.hist=(sh.hist||[]).concat(r.net).slice(-6);
       S.yearShop=(S.yearShop||0)+Math.max(0,r.net);
       sh.cond=clamp(sh.cond-(SHOPS[sh.type].food?1.3:0.9),0,100);
       const R=Math.random();
@@ -1033,13 +1084,13 @@ function shopsMonth(ev){
       else if(R<.14&&!sh.alarm) ev.push({k:'sh_theft',sh}); else if(R<.175) ev.push({k:'sh_rival',sh});
       else if(R<.21) ev.push({k:'sh_viral',sh}); else if(R<.25) ev.push({k:'sh_supplier',sh});
     } else {
-      se+=shopUpkeep(sh); sh.cond=clamp(sh.cond-0.6,0,100);
+      se+=shopUpkeep(sh); S.cash-=shopUpkeep(sh); sh.cond=clamp(sh.cond-0.6,0,100);
       if(sh.mode==='lease'){
         const t=sh.tenant;
         if(t){
           t.months++;
-          if(Math.random()<t.pay*(S.crisis>0?.85:1)){ si+=t.rent; S.yearShop=(S.yearShop||0)+t.rent;
-            if(t.unpaid>0&&Math.random()<.3){ si+=t.rent*t.unpaid; log(`${t.name} birikmiş dükkan kirasını ödedi.`,'g'); t.unpaid=0; } }
+          if(Math.random()<t.pay*(S.crisis>0?.85:1)){ si+=t.rent; pay(sh,t.rent); S.yearShop=(S.yearShop||0)+t.rent;
+            if(t.unpaid>0&&Math.random()<.3){ si+=t.rent*t.unpaid; pay(sh,t.rent*t.unpaid); log(`${t.name} birikmiş dükkan kirasını ödedi.`,'g'); t.unpaid=0; } }
           else { t.unpaid++; log(`${t.name} (${shName(sh)}) dükkan kirasını ödemedi (${t.unpaid}. ay).`,'b'); if(t.unpaid>=3) ev.push({k:'sh_unpaid',sh}); }
           if(t.care<.45&&Math.random()<.08) ev.push({k:'sh_reno',sh});
           if(sh.cond<50&&Math.random()<.1) ev.push({k:'sh_flood',sh});
@@ -1051,7 +1102,6 @@ function shopsMonth(ev){
     }
     if(Math.random()<.03) ev.push({k:'sh_zabita',sh});
   }
-  S.cash+=si-se;
   log(`🏪 Dükkanlar: gelir ${fmt(si)}, gider ${fmt(se)} → <b>${si-se>=0?'+':''}${fmt(si-se)}</b>`, si-se>=0?'g':'b');
 }
 
@@ -1107,6 +1157,7 @@ function shopEvent(e){
 
 // ---- satın alma, iş kolu, işletme şekli ----
 function pickBiz(sh){ return new Promise(res=>{
+  if(S._auto) return res();
   if(S._fast){ const k=sh.opts.find(k=>typeCount(k)<MAX_SAME); if(k) sh.type=k; return res(); }
   const cards=sh.opts.map(k=>{ const T=SHOPS[k], n=typeCount(k), full=n>=MAX_SAME, est=selfEstimate(sh,k);
     return `<button class="bizc ${full?'off':''}" data-k="${k}" ${full?'disabled':''}><span class="be">${T.e}</span><span class="bt"><b>${T.n}</b><small>${T.d}</small><small>🔑 Kiraya ver: ~${fmt(shopRentBase(sh,k))}/ay · 👨‍🍳 İşlet: ~${est>=0?'+':''}${fmt(est)}/ay</small><small>Sende: ${n}/${MAX_SAME}${full?' · sınır doldu':''}</small></span></button>`; }).join('');
@@ -1120,6 +1171,7 @@ function startSelf(sh){
   log(`👨‍🍳 ${shName(sh)} açıldı. Dekor ve ekipman: -${fmt(sc)}`,'b'); return true;
 }
 function pickMode(sh){ return new Promise(res=>{
+  if(S._auto) return res();
   if(!sh.type) return res();
   if(S._fast){ if(S._shopSelf&&S.cash>setupCost(sh)) startSelf(sh); else { sh.mode='lease'; return chooseShopTenant(sh).then(res); } return res(); }
   const T=SHOPS[sh.type], sc=setupCost(sh), est=selfEstimate(sh,sh.type);
@@ -1132,6 +1184,7 @@ function pickMode(sh){ return new Promise(res=>{
   ov.querySelector('#mLater').onclick=()=>{ closeSheet(); res(); };
 });}
 function chooseShopTenant(sh){ return new Promise(res=>{
+  if(S._auto) return res();
   const n=clamp((sh.cond>60?2:1)+(S.rep>60?1:0)+(Math.random()<.4?1:0)-(Math.random()<.3?1:0)-(S.rep<40?1:0),0,3);
   if(!n){ log(`${shName(sh)} için bu ay esnaf başvurmadı (${sh.vacant} aydır boş).`,'b'); return res(); }
   const cands=Array.from({length:n},()=>makeShopTenant(sh));
@@ -1192,7 +1245,7 @@ function openShop(id){
     pickBiz(sh).then(()=>{ if(!sh.type) sh.type=old; return pickMode(sh); }).then(()=>{busy=false;save();render();}); });
   q('#sSell').onclick=()=>{ const v=shopSell(sh), loss=(sh.paid||v)-v;
     ask({ico:'💰',title:'Dükkânı satmak istediğine emin misin?',text:`📍 ${shName(sh)}<br>Aldığın fiyat: <b>${fmt(sh.paid||v)}</b><br>Eline geçecek: <b>${fmt(v)}</b>${loss>0?`<br><span style="color:var(--bad)">Zarar: ${fmt(loss)}</span>`:''}`,
-      choices:[{t:'Evet, sat',sub:`+${fmt(v)}`,fn:()=>{ if(sh.tenant) shopMoveOut(sh,'Dükkan satıldı'); S.cash+=v; Object.assign(sh,{owned:false,type:null,mode:null,paid:0,mods:[],hist:[],lastNet:0,costUp:1,alarm:false}); log(`${sh.addr} dükkânı satıldı: +${fmt(v)}`,'b'); save(); }},{t:'Vazgeç'}]}); };
+      choices:[{t:'Evet, sat',sub:`+${fmt(v)}`,fn:()=>{ if(sh.tenant) shopMoveOut(sh,'Dükkan satıldı'); S.cash+=v+(sh.coins||0); sh.coins=0; Object.assign(sh,{owned:false,type:null,mode:null,paid:0,mods:[],hist:[],lastNet:0,costUp:1,alarm:false}); log(`${sh.addr} dükkânı satıldı: +${fmt(v)}`,'b'); save(); }},{t:'Vazgeç'}]}); };
 }
 
 // ---- harita: çizim, kaydırma, arabalar ----
@@ -1274,7 +1327,7 @@ function shopHTML(sh){
   else if(sh.mode==='self'){ who=`<span class="big">${T.food?'🧑‍🍳':'🧑‍💼'}</span><span class="sic">${T.e}</span>`; st=`👨‍🍳 İşletmen · ${sh.lastNet>=0?'+':''}${fmtK(sh.lastNet)}`; cls=sh.lastNet>=0?'pos':'neg'; }
   else if(sh.tenant){ who=`${personSVG(sh.tenant,52)}<span class="sic">${T.e}</span>`; st=`🔑 Kirada · ${fmtK(sh.tenant.rent)}`; cls='rent'; }
   else { st='🔑 Kiracı bekliyor'; }
-  return `<div class="shop ${sh.owned?'mine':''}" style="left:${x}px;top:${y}px;--c:${T?T.c:'#9aa0a8'}" onclick="openShop(${sh.id})">
+  return `<div class="shop ${sh.owned?'mine':''}" style="left:${x}px;top:${y}px;--c:${T?T.c:'#9aa0a8'}" onclick="openShop(${sh.id})">${sh.owned?bubbles('s',sh):''}
     <div class="ssign">${T?T.n:sh.owned?'Yeni dükkânın':'Boş dükkan'}</div><div class="awn"></div>
     <div class="sfront"><div class="swin">${who||`<span class="big">${T?T.e:sh.owned?'🧰':'🚪'}</span>`}</div><div class="sdoor"></div></div>
     <div class="stag ${cls}">${st}</div><div class="saddr">${sh.addr}</div>${mv?'<span class="sbox">📦📦</span><span class="truck">🚚</span>':''}</div>`;
@@ -1340,33 +1393,20 @@ function openMgrOverview(){
 // Her adım bir ekran öğesini vurgular. "İleri", "◀" ve "Tanıtımı atla". Görülen tur bu cihazda bir daha kendiliğinden açılmaz.
 const TOURS={
   homes:[
-    {t:'Kira Günü\'ne hoş geldin! 🏘️',x:'Mahallenin ev sahibisin: ev ve daire al, kiracı seç, kirayı topla, mülkünü büyüt. Kısa bir tur yapalım. İstemezsen "Tanıtımı atla"ya bas.'},
-    {s:'#hCash',t:'💰 Kasan',x:'Paran burada. Kiralar her ay buraya girer, giderler buradan çıkar. Kasan 3 ay üst üste ekside kalırsa iflas edersin.'},
-    {s:'#hClock',t:'🕗 Saat',x:'Gün kendi kendine akar: sabah, öğle, akşam, gece. Gece pencereler yanar, kiracılar uyur.'},
-    {s:'#hMonth',t:'📅 Ay, yıl ve mevsim',x:'Oyun ay ay ilerler. Mevsimler önemli: yazın kiracılar klima ister, sonbahar ve kışta üst katlarda çatı sızdırabilir, kışın kombiler bozulur.'},
-    {s:'#hRep',t:'⭐ İtibar',x:'Kiracılara ve komşulara nasıl davrandığın. Yüksekse iyi kiracılar gelir ve yıl sonunda ödül alırsın; düşükse kaliteli kiracılar gelmez.'},
-    {s:'.flw.mine, .lot.mine',t:'🏠 Senin evin',x:'Sarı çerçeveli, içi görünen yerler senin. Dokununca kiracını ve evin durumunu görürsün: tamir edebilir, kiracıyı çıkarabilir ya da satabilirsin.'},
-    {s:'.ribbon, .lot .sale',t:'🏷️ Satılık',x:'Kırmızı SATILIK yazan daireye ya da eve dokun ve satın al. Apartmanlarda üst katlar daha pahalı ama kirası da yüksek.'},
-    {s:'#street',t:'👉 Sokak',x:'Sokağı parmağınla sağa sola kaydır: ileride yeni apartmanlar ve teraslı çatı katları var. Bir binanın tabelasına dokunursan bütün dairelerini görürsün.'},
-    {s:'.tabs',t:'🏠 Evler · 🏪 Dükkanlar',x:'Seviye 10\'da dükkanlar açılır. Bu sekmeyle çarşı haritasına geçersin.'},
-    {s:'#lTxt',t:'🏅 Seviye',x:'Her yeni yılda 1 seviye atlarsın ve bonus alırsın. Seviye 9\'da binalarına yönetici atayabilirsin, seviye 10\'da dükkanlar açılır.'},
-    {s:'#qLine',t:'🎯 Görevler',x:'Sıradaki görevin burada. Tamamlayınca ödül kendiliğinden kasana girer. 📋 düğmesi bütün görevleri ve rozetleri gösterir.'},
-    {s:'#log',t:'📜 Olay günlüğü',x:'Olan her şey buraya yazılır: ödenen kiralar, taşınan kiracılar, cezalar, sürprizler.'},
-    {s:'#bNext',t:'▶ Sonraki Ay',x:'Oyunu bir ay ilerletir: kiralar gelir, giderler düşer, kiracıların ve evlerin olayları çıkar. Senin kararın gerekirse pencere açılır. ⏩ düğmesi ayları kendiliğinden ilerletir.'},
-    {s:'.menuBtn',t:'☰ Menü',x:'Yöneticiler, toplam servetin ve bu tanıtım burada. Tanıtımı tekrar görmek için: Menü → Nasıl oynanır.'},
-    {t:'Hazırsın! 🔑',x:'İpucu: adayların "ilk izlenim" yıldızları yanıltabilir. Referans kontrolü kiracının gerçek karakterini gösterir. Bol kiralı günler!'},
+    {t:'Kira Günü\'ne hoş geldin! 🏘️',x:'Mahallenin ev sahibisin: kiracı seç, kirayı topla, para biriktirip yeni evler al. 4 kısa adım. İstemezsen "Tanıtımı atla".'},
+    {s:'#hCash',t:'💰 Kasan',x:'Paran burada. Kasan uzun süre ekside kalırsa iflas edersin.'},
+    {s:'.flw.mine, .lot.mine',t:'🏠 Senin evin',x:'Sarı çerçeveli yerler senin. Kira her ay evin üstünde 💰 baloncuk olarak birikir: dokun, kasana uçsun. Sorun olan evde ❗ çıkar. Eve dokunursan detayını görürsün.'},
+    {s:'#tasks',t:'📝 Bu ay yapılacaklar',x:'Kiracı seçmek, arızalar, şikâyetler buraya kart olarak gelir. Kırmızı çizgili "zorunlu" işleri bitirmeden ay geçmez; diğerlerini istersen yap.'},
+    {s:'#bNext',t:'▶ Ayı bitir',x:'Hazır olunca bas: zaman sadece sen basınca ilerler. 🔔 bildirimlerin, ☰ menüde itibar, seviye ve "Nasıl oynanır" var. İlk işin: listedeki boş evine kiracı seç!'},
   ],
   shops:[
-    {t:'Çarşıya hoş geldin! 🏪',x:'Burada dükkan alıp kiraya verebilir ya da kendin işletebilirsin. Paran, itibarın, seviyen ve vergilerin evlerle ortak.'},
-    {s:'#map',t:'🗺️ Harita',x:'Haritayı parmağınla sağa, sola, yukarı ve aşağı sürükleyerek gez. En ucuz dükkan sol üst köşede, sağ alta doğru pahalanır. Meydan çevresi daha işlek.'},
-    {s:'.mpad',t:'⌂ Başa dön',x:'Haritada kaybolursan bu düğmeye bas: seni en ucuz dükkânın olduğu sol üst köşeye geri götürür.'},
-    {s:'#shopsLayer .shop:not(.mine)',t:'🏷️ Satılık dükkan',x:'Bir dükkâna dokun: fiyatını ve orada açabileceğin 3 iş kolunu görürsün. Aynı türden en fazla 4 dükkânın olabilir.'},
-    {t:'🔑 Kiraya ver mi, 👨‍🍳 kendin mi işlet?',x:'Kiraya verirsen esnaf her ay kira öder, risk azdır. Kendin işletirsen ciro ve gider her ay değişir: mevsim, itibar ve şans etkiler. Kâr da zarar da senin.'},
-    {s:'#shopGoal',t:'📊 Dükkanların',x:'Kaç dükkânın olduğu ve dükkanlardan aylık tahmini kazancın burada.'},
-    {s:'#tabHomes',t:'🏠 Evlere dön',x:'Evlere bu sekmeyle dönersin. Yönetici atadığın binalar işlerini sana sormadan halleder; ne yaptıklarını Evler\'deki "Yönetici raporu"nda görürsün.'},
+    {t:'Çarşıya hoş geldin! 🏪',x:'Dükkan al; kiraya ver ya da kendin işlet. Paran ve işlerin evlerle ortak.'},
+    {s:'#map',t:'🗺️ Harita',x:'Parmağınla sürükleyerek gez. En ucuz dükkan sol üstte. ⌂ seni başa döndürür.'},
+    {s:'#shopsLayer .shop:not(.mine)',t:'🏷️ Satılık dükkan',x:'Dokun: fiyatını ve açabileceğin 3 iş kolunu görürsün. Gelirin dükkânın üstünde 💰 olarak birikir.'},
+    {s:'#tasks',t:'📝 İşler',x:'Dükkan işleri de aynı listeye gelir. Evlere üstteki sekmeden dönersin.'},
   ],
 };
-const TOUR_KEY=n=>'kira-gunu-tour-'+n, TOUR_MEM={};
+const TOUR_KEY=n=>'kira-gunu-tour2-'+n, TOUR_MEM={};
 function tourSeen(n){ try{ return localStorage.getItem(TOUR_KEY(n))==='1'; }catch(e){ return !!TOUR_MEM[n]; } }
 function markTour(n){ TOUR_MEM[n]=1; try{ localStorage.setItem(TOUR_KEY(n),'1'); }catch(e){} }
 let tourP=Promise.resolve(), tourQ=new Set();
@@ -1400,6 +1440,82 @@ function runTour(n){ return new Promise(res=>{
   tour.classList.add('on'); show(); requestAnimationFrame(show);
 });}
 
+
+// ================= SADE ARAYÜZ: İŞ KARTLARI · 🔔 BİLDİRİMLER · 💰 BALONCUKLAR · KİLİTLİ BİNALAR =================
+// Karar gereken olaylar pencere açmaz, "Bu ay yapılacaklar" listesine kart olur. Zorunlular bitmeden ay geçmez.
+// İsteğe bağlı kartlar bir ay sonra varsayılan seçimle kendiliğinden kapanır. Sadece bilgi veren olaylar 🔔'a yazılır.
+const TASK_META={find:['🔑','Boş eve kiracı seç'],unpaid:['💸','Kira ödenmiyor'],noise:['📢','Komşu şikâyeti'],damage:['🔨','Evde hasar var'],leak:['💧','Boru patladı'],
+  boiler:['🥶','Kombi bozuldu'],roofleak:['🌧️','Tavandan su sızıyor'],ac:['🥵','Kiracı klima istiyor'],raise:['📈','Kira artışı zamanı'],story:['📖','Kiracının bir haberi var'],
+  bargain:['👵','Acil satış fırsatı'],roof:['🏚️','Apartman ortak gideri'],quake:['🏗️','Deprem güçlendirme raporu'],maliye:['🏛️','Maliye yıl sonu denetimi'],
+  sh_find:['🔑','Dükkânına kiracı seç'],sh_setup:['⚙️','Dükkânını kur'],sh_unpaid:['💸','Dükkan kirası ödenmiyor'],sh_reno:['🔨','İzinsiz tadilat'],sh_flood:['🌊','Dükkânı su bastı'],
+  sh_renew:['📈','Dükkan kira artışı'],sh_zabita:['👮','Zabıta denetimi'],sh_staff:['🧑‍🍳','Çalışan zam istiyor'],sh_hygiene:['🧪','Hijyen denetimi'],sh_theft:['🦹','Dükkâna hırsız girdi'],
+  sh_rival:['🏬','Karşıya rakip açıldı'],sh_supplier:['🚚','Tedarikçi zam yaptı']};
+const TASK_REQ=new Set(['find','unpaid','leak','boiler','roofleak','maliye','sh_find','sh_unpaid','sh_flood','sh_hygiene','sh_theft']);
+const TASK_INFO=new Set(['levelup','metro','crisis','paint','inspect','gift','repyear','sh_viral']);
+const TASK_DEFAULT={noise:2,damage:2,ac:2,raise:0,story:-1,bargain:1,roof:1,quake:1,sh_reno:2,sh_renew:0,sh_zabita:0,sh_staff:1,sh_rival:1,sh_supplier:0};
+const TENANT_TASKS=new Set(['unpaid','noise','damage','raise','story','ac','sh_unpaid','sh_reno','sh_renew']);
+function addTask(e){
+  const key=e.k+(e.u?'u'+e.u.id:'')+(e.sh?'s'+e.sh.id:'');
+  if(S.tasks.some(t=>t.key===key)) return false;
+  const tn=e.u&&e.u.tenant?e.u.tenant.name:e.sh&&e.sh.tenant?e.sh.tenant.name:null;
+  S.tasks.push({id:++S.taskSeq,key,k:e.k,uid:e.u?e.u.id:null,shid:e.sh?e.sh.id:null,tn,req:TASK_REQ.has(e.k),at:S.month}); return true;
+}
+function taskEvent(tk){ const e={k:tk.k}; if(tk.uid!=null){ e.u=U(tk.uid); e.t=e.u&&e.u.tenant; } if(tk.shid!=null) e.sh=S.shops[tk.shid]; return e; }
+function taskValid(tk){
+  if(tk.uid!=null){ const u=U(tk.uid); if(!u||!u.owned||mgrOf(u)) return false; if(tk.k==='find') return !u.tenant; if(TENANT_TASKS.has(tk.k)) return !!u.tenant&&u.tenant.name===tk.tn; return true; }
+  if(tk.shid!=null){ const sh=S.shops[tk.shid]; if(!sh||!sh.owned) return false; if(tk.k==='sh_find') return sh.mode==='lease'&&!sh.tenant; if(tk.k==='sh_setup') return !(sh.type&&sh.mode); if(TENANT_TASKS.has(tk.k)) return !!sh.tenant&&sh.tenant.name===tk.tn; return true; }
+  return true;
+}
+const taskWhere=tk=>tk.uid!=null?uname(U(tk.uid)):tk.shid!=null?shName(S.shops[tk.shid]):'Genel';
+async function openTask(id){
+  if(busy) return; const tk=S.tasks.find(x=>x.id===id); if(!tk) return;
+  if(!taskValid(tk)){ S.tasks=S.tasks.filter(x=>x!==tk); render(); return; }
+  busy=true; render();
+  try{ await handle(taskEvent(tk)); } finally { S.tasks=S.tasks.filter(x=>x.id!==id); busy=false; save(); render(); }
+}
+function openTaskFor(kind,id,ev){ if(ev) ev.stopPropagation(); const tk=S.tasks.find(x=>kind==='u'?x.uid===id:x.shid===id); if(tk) openTask(tk.id); }
+async function autoResolve(e,pick,info){ S._auto={pick,info}; try{ await handle(e); } finally { S._auto=null; } }
+function renderTasks(){
+  const ct=coinTotal(), list=S.tasks.slice().sort((a,b)=>b.req-a.req||a.id-b.id);
+  let h=`<div class="thead"><span>BU AY YAPILACAKLAR${list.length?' ('+list.length+')':''}</span>${ct>0?`<button class="collectAll" onclick="collectAll(event)">💰 Hepsini topla · ${fmtK(ct)}</button>`:''}</div>`;
+  h+= list.length ? list.map(tk=>{ const [ic,ti]=TASK_META[tk.k]||['❓',tk.k];
+      return `<button class="tcard ${tk.req?'req':''}" onclick="openTask(${tk.id})"><span class="e">${ic}</span><span class="t"><b>${ti}</b><small>${taskWhere(tk)} · ${tk.req?'<span class="rq">zorunlu</span>':'isteğe bağlı'}</small></span><span class="go">›</span></button>`; }).join('')
+    : `<div class="tempty">✅ Yapılacak iş yok. ${ct>0?'Kiraları topla, sonra ':''}ayı bitir.</div>`;
+  const el=document.getElementById('tasks'); if(el.innerHTML!==h) el.innerHTML=h;
+}
+// ---- 🔔 bildirimler ve 📜 geçmiş ----
+function bell(text){ S.bell.unshift({d:`${MONTHS[calM()]} ${year()}`,t:text}); if(S.bell.length>60) S.bell.length=60; S.bellNew=(S.bellNew||0)+1; }
+function openBell(){ if(busy) return; S.bellNew=0;
+  sheet(`<h2>🔔 Bildirimler</h2><p>Karar gerektirmeyen olaylar burada birikir, en yenisi üstte.</p>${S.bell.length?S.bell.map(x=>`<div class="bline"><b>${x.d}</b><span>${x.t}</span></div>`).join(''):'<p>Henüz bildirim yok.</p>'}<button class="ch" onclick="closeSheet()"><b>Kapat</b></button>`); render(); }
+function openHistory(){ if(busy) return;
+  sheet(`<h2>📜 Geçmiş</h2><p>Olan her şey, en yenisi üstte.</p><div class="hist2">${S.log.map(l=>`<div class="${l.c}">${l.t}</div>`).join('')}</div><button class="ch" onclick="closeSheet()"><b>Kapat</b></button>`); }
+// ---- 💰 kira baloncukları ----
+const coinTotal=()=>owned().reduce((a,u)=>a+(u.coins||0),0)+S.shops.reduce((a,x)=>a+(x.owned?(x.coins||0):0),0);
+function bubbles(kind,o){
+  const hasTask=S.tasks.some(t=>kind==='u'?t.uid===o.id:t.shid===o.id);
+  const h=(hasTask?`<span class="coin alert" onclick="openTaskFor('${kind}',${o.id},event)">❗</span>`:'')+(o.coins>0?`<span class="coin" onclick="collect('${kind}',${o.id},event)">💰 ${fmtK(o.coins)}</span>`:'');
+  return h?`<span class="bub">${h}</span>`:'';
+}
+function flyCoin(fromEl){
+  const to=document.getElementById('hCash').getBoundingClientRect(), r=fromEl?fromEl.getBoundingClientRect():{left:innerWidth/2,top:innerHeight/2};
+  const f=document.createElement('span'); f.className='flyc'; f.textContent='💰'; f.style.left=r.left+'px'; f.style.top=r.top+'px'; document.body.appendChild(f);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ f.style.left=(to.left+10)+'px'; f.style.top=(to.top+4)+'px'; f.style.opacity=.2; }));
+  setTimeout(()=>f.remove(),700);
+}
+function collect(kind,id,ev){
+  if(ev) ev.stopPropagation(); const o=kind==='u'?U(id):S.shops[id], a=o&&o.coins||0; if(!a) return;
+  o.coins=0; flyCoin(ev&&ev.target); setTimeout(()=>{ S.cash+=a; save(); render(); },600); lastStreet=''; lastMap=''; render();
+}
+function collectAll(ev){
+  if(ev) ev.stopPropagation(); let a=0;
+  document.querySelectorAll('.coin:not(.alert)').forEach((el,i)=>{ if(i<6&&el.getBoundingClientRect().width) setTimeout(()=>flyCoin(el),i*70); });
+  owned().forEach(u=>{ a+=u.coins||0; u.coins=0; }); S.shops.forEach(x=>{ if(x.owned){ a+=x.coins||0; x.coins=0; } });
+  lastStreet=''; lastMap=''; render(); setTimeout(()=>{ S.cash+=a; save(); render(); },650);
+}
+// ---- mahalle büyür: başta 2 bina, her yıl 1 yeni bina ----
+function unlockedCount(){ const yrs=Math.floor((S.month-(S.start==null?S.month:S.start))/12); let n=Math.min(S.blds.length,2+yrs); S.blds.forEach((b,i)=>{ if(b.units.some(u=>u.owned)) n=Math.max(n,i+1); }); return n; }
+const bldOpen=b=>b.id<unlockedCount();
+
 // ================= PENCERELER =================
 const ov=document.getElementById('ov');
 function sheet(html){ const st=ov.querySelector('.sheet')?.scrollTop||0, again=ov.classList.contains('on');
@@ -1408,6 +1524,8 @@ function closeSheet(){ ov.classList.remove('on'); ov.innerHTML=''; }
 function ask(spec){ return new Promise(res=>{
   if(S._mgr){ const i=mgrPick(spec), c=spec.choices[i]; c.fn&&c.fn(); S.rep=clamp(S.rep,0,100);
     mgrNote(S._mgr.b, `${strip(spec.title)} → ${c.t}${c.sub?' ('+strip(c.sub)+')':''}`); return res(); }
+  if(S._auto){ const n=spec.choices.length; let i=S._auto.pick; if(i==null||i<0||i>=n) i=n-1; const c=spec.choices[i]; c.fn&&c.fn(); S.rep=clamp(S.rep,0,100);
+    bell(S._auto.info ? `${spec.ico||''} ${strip(spec.title)} · ${strip(spec.text).slice(0,170)}` : `⏰ Süresi doldu: ${strip(spec.title)} → ${c.t}`); return res(); }
   if(S._fast){ const c=spec.choices[S._fastPick?Math.random()*spec.choices.length|0:0]; c.fn&&c.fn(); S.rep=clamp(S.rep,0,100); return res(); }
   sheet(`<div class="evico">${spec.who?personSVG(spec.who,72):spec.ico}</div><h2>${spec.who?spec.ico+' ':''}${spec.title}</h2><p>${spec.text}</p>`+spec.choices.map((c,i)=>`<button class="ch" data-i="${i}"><b>${c.t}</b>${c.sub?`<small>${c.sub}</small>`:''}</button>`).join(''));
   ov.querySelectorAll('.ch').forEach(b=>b.onclick=()=>{ closeSheet(); const c=spec.choices[+b.dataset.i]; c.fn&&c.fn(); S.rep=clamp(S.rep,0,100); render(); res(); });
@@ -1425,6 +1543,7 @@ function candHTML(c,i,rc=REF_COST){
 }
 function candCount(u){ let n=(u.cond>60?2:1)+(S.rep>60?1:0)+(Math.random()<.4?1:0)-(Math.random()<.3?1:0)-(S.rep<40?1:0); return clamp(n,0,3); }
 function chooseTenant(u){ return new Promise(res=>{
+  if(S._auto) return res();
   const n=candCount(u);
   if(n===0){ log(`${uname(u)} için bu ay kimse başvurmadı (${u.vacant} aydır boş).`,'b'); if(S._mgr) mgrNote(S._mgr.b,`${uname(u)}: bu ay kimse başvurmadı (${u.vacant} aydır boş)`); return res(); }
   const cands=Array.from({length:n},()=>makeTenant(u));
@@ -1499,7 +1618,7 @@ function openUnit(id){
   q('#bFind')&&(q('#bFind').onclick=()=>{ closeSheet(); if(u._searched===S.month){toast('Bu ay adaylara zaten baktın');return;} u._searched=S.month; busy=true; chooseTenant(u).then(()=>{busy=false;save();render();}); });
   q('#bSell').onclick=()=>{ if(owned().length<=1) return toast('Son mülkünü satamazsın!'); const v=sellPrice(u), loss=(u.paid||v)-v;
     ask({ico:'💰',title:'Satmak istediğine emin misin?',text:`📍 ${uname(u)}<br>Aldığın fiyat: <b>${fmt(u.paid||v)}</b><br>Eline geçecek: <b>${fmt(v)}</b>${loss>0?`<br><span style="color:var(--bad)">Zarar: ${fmt(loss)}</span> (komisyon, tapu harcı, vergi)`:''}${u.tenant?`<br>${u.tenant.name} evden çıkacak.`:''}`,
-      choices:[{t:'Evet, sat',sub:`+${fmt(v)}`,fn:()=>{ S.cash+=v; moveOut(u,'Ev satıldı, yeni sahibi evi boş istedi'); u.owned=false; u.paid=0; u.sale=null; log(`${uname(u)} satıldı: +${fmt(v)}${loss>0?` (zarar ${fmt(loss)})`:''}`,'b'); save(); }},{t:'Vazgeç'}]}); };
+      choices:[{t:'Evet, sat',sub:`+${fmt(v)}`,fn:()=>{ S.cash+=v+(u.coins||0); u.coins=0; moveOut(u,'Ev satıldı, yeni sahibi evi boş istedi'); u.owned=false; u.paid=0; u.sale=null; log(`${uname(u)} satıldı: +${fmt(v)}${loss>0?` (zarar ${fmt(loss)})`:''}`,'b'); save(); }},{t:'Vazgeç'}]}); };
 }
 function openMenu(){
   sheet(`<h2>☰ Menü</h2><div class="kv"><span>Tarih</span><b>${MONTHS[calM()]} ${year()} · ${SEASONS[season()].e} ${SEASONS[season()].n}</b><span>Seviye</span><b>${level()}${level()>=SHOP_LEVEL?' · 🏪 Dükkanlar açık':` · Dükkanlar: Sv.${SHOP_LEVEL}`}</b><span>Mülkler</span><b>${owned().length}/${GOAL}</b><span>Toplam servet</span><b>${fmt(S.cash+owned().reduce((s,u)=>s+value(u),0))}</b><span>İtibar</span><b>${Math.round(S.rep)}/100</b></div>
@@ -1554,7 +1673,7 @@ function facadeHTML(b,f,ground,w){
 }
 function unitLayer(b,u,f){
   const h = u.owned ? roomHTML(u,f,isApt(b)||f===0,b) : facadeHTML(b,f,f===0,u.pent?(b.w||154)*.7:0);
-  return h + (isApt(b)&&u.sale&&!u.owned?`<span class="ribbon">SATILIK · ${fmtK(u.sale.price)}</span>`:'') + (isApt(b)&&u.owned?`<span class="mineTag">SENİN</span>`:'');
+  return h + (u.owned&&(isApt(b)||f===0)?bubbles('u',u):'') + (isApt(b)&&u.sale&&!u.owned?`<span class="ribbon">SATILIK · ${fmtK(u.sale.price)}</span>`:'') + (isApt(b)&&u.owned?`<span class="mineTag">SENİN</span>`:'');
 }
 function bldHTML(b){
   const T=TYPES[b.type], apt=isApt(b); let fl='';
@@ -1586,16 +1705,21 @@ function fitStreet(){
   Object.assign(st.style,{transformOrigin:'0 100%',transform:`scale(${z})`,width:(100/z)+'%',height:(100/z)+'%',top:'auto',left:'0',right:'auto',bottom:'0'});
 }
 addEventListener('resize',()=>{ if(S) fitStreet(); });
+function lockedHTML(b){
+  const T=TYPES[b.type], left=Math.max(1,Math.ceil(((b.id-1)*12-(S.month-S.start))/12));
+  return `<div class="lot locked" style="width:${b.w||T.w}px"><div class="sign ${isApt(b)?'':'house'}">${b.name}</div><div class="lockbox">🔒<small>${left} yıl sonra açılır</small></div><div class="plate">Yakında</div></div>`;
+}
 function renderStreet(){
-  const tree=e=>`<span class="tree"><span class="t">${e}</span></span>`;
-  const html='<span class="cloud">☁️</span>'+S.blds.map((b,i)=>bldHTML(b)+(i%3===2?tree('🌳')+'<span class="cloud" style="top:52px">☁️</span>':i%2?'<span class="lamp">🏮</span>':'')).join('')+tree('🌲');
+  const tree=e=>`<span class="tree"><span class="t">${e}</span></span>`, n=unlockedCount(), shown=S.blds.slice(0,Math.min(S.blds.length,n+1));
+  const html='<span class="cloud">☁️</span>'+shown.map((b,i)=>(i<n?bldHTML(b):lockedHTML(b))+(i%3===2?tree('🌳')+'<span class="cloud" style="top:52px">☁️</span>':i%2?'<span class="lamp">🏮</span>':'')).join('')+tree('🌲');
+  document.getElementById('hint').style.display=n>=4?'':'none';
   if(html!==lastStreet){ const st=document.getElementById('street'), x=st.scrollLeft; st.innerHTML=html; st.scrollLeft=x; lastStreet=html; }
 }
 document.getElementById('street').addEventListener('scroll',e=>{ if(e.target.scrollLeft>200) document.getElementById('hint').style.opacity=0; },{passive:true});
 function renderHud(){
   const c=document.getElementById('hCash'); c.textContent='💰 '+fmt(S.cash); c.classList.toggle('neg',S.cash<0);
   const sn=SEASONS[season()];
-  document.getElementById('hMonth').innerHTML=`${sn.e} ${MONTHS[calM()]}<small>${year()} · ${sn.n}</small>`;
+  document.getElementById('hMonth').innerHTML=`${sn.e} ${MONTHS[calM()]}<small>${year()} · Sv.${level()}</small>`;
   const lv=level(), yp=((calM()+12)%12)/12;
   document.getElementById('lTxt').textContent=`Seviye ${lv}`;
   document.getElementById('lBar').style.width=(lv>=SHOP_LEVEL?100:((lv+yp)/SHOP_LEVEL*100))+'%';
@@ -1611,9 +1735,11 @@ function render(){
   document.getElementById('gBar').style.width=o/GOAL*100+'%';
   const inc=owned().reduce((s,u)=>s+(u.tenant?u.tenant.rent:0)-upkeep(u),0);
   document.getElementById('gInc').textContent=`aylık ~${inc>=0?'+':''}${fmt(inc)}`;
-  document.getElementById('log').innerHTML=S.log.map(l=>`<div class="${l.c}">${l.t}</div>`).join('');
-  document.getElementById('bAuto').classList.toggle('on',!!S.auto);
-  document.getElementById('bNext').disabled=S.over||busy;
+  S.tasks=S.tasks.filter(taskValid);
+  const reqN=S.tasks.filter(x=>x.req).length, bn=document.getElementById('bNext');
+  bn.disabled=S.over||busy||reqN>0; bn.innerHTML=reqN?`Ayı bitir ▶ <small style="font-weight:700;font-size:12px">(${reqN} zorunlu iş)</small>`:'Ayı bitir ▶';
+  renderTasks();
+  const bnN=document.getElementById('hBellN'); bnN.textContent=S.bellNew||''; bnN.style.display=S.bellNew?'':'none';
   document.getElementById('qLine').innerHTML=questLine();
   document.getElementById('qCount').textContent=S.badges.length||'';
   const os=S.shops.filter(x=>x.owned), sinc=os.reduce((a,x)=>a+(x.mode==='self'?x.lastNet:x.mode==='lease'&&x.tenant?x.tenant.rent-shopUpkeep(x):-shopUpkeep(x)),0);
