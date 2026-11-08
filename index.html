@@ -19,7 +19,7 @@
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
-#app{position:fixed;inset:0;display:flex;flex-direction:column}
+#app{position:fixed;top:0;left:0;right:0;bottom:0;height:100%;height:100dvh;display:flex;flex-direction:column}
 .hud{display:flex;gap:5px;padding:10px 8px 10px 10px;padding-top:max(10px,env(safe-area-inset-top));background:#0e1326;align-items:center}
 .chip{background:var(--panel);border-radius:10px;padding:5px 7px;font-size:12px;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
 .chip small{display:block;font-size:9px;color:var(--muted);font-weight:700;line-height:1.1}
@@ -27,7 +27,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .chip.neg{color:var(--bad)}
 .menuBtn{font-size:18px;padding:4px 4px}
 /* sahne */
-.scene{flex:none;height:min(460px,58dvh);position:relative;overflow:hidden}
+.scene{flex:1 1 300px;min-height:200px;max-height:470px;position:relative;overflow:hidden}
 .sky{position:absolute;inset:0}
 .skyfx{position:absolute;inset:0;background:#5d6676;opacity:0;transition:opacity 1.2s;pointer-events:none}
 .wx-rain .skyfx{opacity:.25}.wx-snow .skyfx{opacity:.2;background:#c9d3e0}
@@ -125,10 +125,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .hint{position:absolute;right:8px;top:8px;z-index:6;background:#000a;color:#fff;font-size:11px;font-weight:800;padding:4px 8px;border-radius:99px;pointer-events:none;animation:hint 1.6s ease-in-out infinite;transition:opacity .4s}
 @keyframes hint{50%{transform:translateX(-6px)}}
 /* alt panel */
-.panel{flex:1;min-height:0;display:flex;flex-direction:column;gap:8px;padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom))}
+.panel{flex:1 0 auto;display:flex;flex-direction:column;gap:7px;padding:8px 12px;padding-bottom:max(8px,calc(env(safe-area-inset-bottom) - 6px))}
 .goal{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
 .prog{flex:1;height:8px;background:#0006;border-radius:4px;overflow:hidden}.prog i{display:block;height:100%;background:var(--gold)}
-.log{flex:1;min-height:0;overflow-y:auto;background:var(--panel);border-radius:12px;padding:8px 10px;font-size:13px;line-height:1.5}
+.log{flex:1 1 auto;min-height:92px;max-height:38dvh;height:0;overflow-y:auto;background:var(--panel);border-radius:12px;padding:8px 10px;font-size:13px;line-height:1.5}
 .log div{border-bottom:1px solid #ffffff10;padding:3px 0}
 .log .g{color:var(--good)}.log .b{color:var(--bad)}.log .m{color:var(--muted)}.log .s{color:#8fd3ff}
 .actions{display:flex;gap:8px}
@@ -195,7 +195,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .tabs{display:flex;gap:6px;padding:6px 10px;background:#0e1326}
 .tabs button{flex:1;background:var(--panel);border-radius:10px;padding:7px;font-weight:800;font-size:13px;color:var(--muted)}
 .tabs button.on{background:var(--gold);color:#2a1d00}
-.map{flex:none;height:min(460px,58dvh);position:relative;overflow:hidden;background:#3d5a35;touch-action:none;cursor:grab;user-select:none}
+.map{flex:1 1 300px;min-height:200px;max-height:470px;position:relative;overflow:hidden;background:#3d5a35;touch-action:none;cursor:grab;user-select:none}
 .map:active{cursor:grabbing}
 .world{position:absolute;left:0;top:0;background:#78b653;will-change:transform;transform-origin:0 0}
 .world.anim{transition:transform .35s ease}
@@ -233,8 +233,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .shop.mine .sfront{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold),4px 6px 0 rgba(0,0,0,.18)}
 .shop:not(.mine) .sfront,.shop:not(.mine) .awn{filter:saturate(.35) brightness(.95)}
 .shop .sbox{position:absolute;bottom:50px;left:-12px;font-size:16px;z-index:3}
-.mpad{position:absolute;right:10px;bottom:10px;display:grid;grid-template-columns:repeat(3,36px);grid-template-rows:repeat(3,36px);gap:3px;z-index:5}
-.mpad button{background:#000a;color:#fff;border-radius:9px;font-size:15px;font-weight:900}
+.mpad{position:absolute;right:10px;bottom:10px;z-index:5}
+.mpad button{width:42px;height:42px;background:#000b;color:#fff;border-radius:12px;font-size:20px;font-weight:900}
 .mhint{position:absolute;left:10px;top:8px;z-index:5;background:#000a;color:#fff;font-size:11px;font-weight:800;padding:4px 9px;border-radius:99px;pointer-events:none}
 .bizc{display:flex;gap:12px;align-items:center;text-align:left;background:var(--panel2);border-radius:14px;padding:12px;width:100%;border:2px solid transparent}
 .bizc:active{border-color:var(--gold)}
@@ -316,8 +316,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   </div>
   <div class="map" id="map" style="display:none">
     <div class="world" id="world"></div>
-    <div class="mhint">Sürükle ya da oklarla gez · En ucuz dükkan sol üstte</div>
-    <div class="mpad"><span></span><button onclick="panBy(0,260)">▲</button><span></span><button onclick="panBy(260,0)">◀</button><button onclick="panHome()">⌂</button><button onclick="panBy(-260,0)">▶</button><span></span><button onclick="panBy(0,-260)">▼</button><span></span></div>
+    <div class="mhint">Parmağınla sürükleyerek gez · En ucuz dükkan sol üstte</div>
+    <div class="mpad"><button onclick="panHome()" aria-label="Başa dön">⌂</button></div>
   </div>
   <div class="panel">
     <div class="goal">🏅 <b id="lTxt" style="color:var(--text)">Seviye 0</b><div class="prog"><i id="lBar" style="background:linear-gradient(90deg,#8f6bff,#c07bff)"></i></div><span id="lShop"></span></div>
@@ -1358,8 +1358,8 @@ const TOURS={
   ],
   shops:[
     {t:'Çarşıya hoş geldin! 🏪',x:'Burada dükkan alıp kiraya verebilir ya da kendin işletebilirsin. Paran, itibarın, seviyen ve vergilerin evlerle ortak.'},
-    {s:'#map',t:'🗺️ Harita',x:'Haritayı parmağınla sürükleyerek gez. En ucuz dükkan sol üst köşede, sağ alta doğru pahalanır. Meydan çevresi daha işlek.'},
-    {s:'.mpad',t:'⬆️ Oklar',x:'Oklarla da gezebilirsin. ⌂ seni sol üst köşeye geri götürür.'},
+    {s:'#map',t:'🗺️ Harita',x:'Haritayı parmağınla sağa, sola, yukarı ve aşağı sürükleyerek gez. En ucuz dükkan sol üst köşede, sağ alta doğru pahalanır. Meydan çevresi daha işlek.'},
+    {s:'.mpad',t:'⌂ Başa dön',x:'Haritada kaybolursan bu düğmeye bas: seni en ucuz dükkânın olduğu sol üst köşeye geri götürür.'},
     {s:'#shopsLayer .shop:not(.mine)',t:'🏷️ Satılık dükkan',x:'Bir dükkâna dokun: fiyatını ve orada açabileceğin 3 iş kolunu görürsün. Aynı türden en fazla 4 dükkânın olabilir.'},
     {t:'🔑 Kiraya ver mi, 👨‍🍳 kendin mi işlet?',x:'Kiraya verirsen esnaf her ay kira öder, risk azdır. Kendin işletirsen ciro ve gider her ay değişir: mevsim, itibar ve şans etkiler. Kâr da zarar da senin.'},
     {s:'#shopGoal',t:'📊 Dükkanların',x:'Kaç dükkânın olduğu ve dükkanlardan aylık tahmini kazancın burada.'},
@@ -1578,6 +1578,14 @@ function bldHTML(b){
     <div class="plate ${mineN?'mine':''}">${plate}</div></div>`;
 }
 let lastStreet='';
+function fitStreet(){
+  const sc=document.getElementById('scene'), st=document.getElementById('street'); if(!sc||!sc.clientHeight) return;
+  const tall=Math.max(0,...[...st.querySelectorAll('.lot')].map(l=>l.offsetHeight));
+  const need=tall+34+48, z=Math.min(1,Math.max(.5,sc.clientHeight/need));
+  if(z>0.995){ Object.assign(st.style,{transform:'',width:'',height:'',top:'',left:'',right:'',bottom:''}); return; }
+  Object.assign(st.style,{transformOrigin:'0 100%',transform:`scale(${z})`,width:(100/z)+'%',height:(100/z)+'%',top:'auto',left:'0',right:'auto',bottom:'0'});
+}
+addEventListener('resize',()=>{ if(S) fitStreet(); });
 function renderStreet(){
   const tree=e=>`<span class="tree"><span class="t">${e}</span></span>`;
   const html='<span class="cloud">☁️</span>'+S.blds.map((b,i)=>bldHTML(b)+(i%3===2?tree('🌳')+'<span class="cloud" style="top:52px">☁️</span>':i%2?'<span class="lamp">🏮</span>':'')).join('')+tree('🌲');
@@ -1597,7 +1605,7 @@ function renderHud(){
 function render(){
   if(!S) return;
   checkProgress();
-  renderHud(); applySeason(); renderStreet();
+  renderHud(); applySeason(); renderStreet(); fitStreet();
   const o=owned().length;
   document.getElementById('gTxt').textContent=`${o}/${GOAL} mülk`;
   document.getElementById('gBar').style.width=o/GOAL*100+'%';
