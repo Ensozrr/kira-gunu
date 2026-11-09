@@ -200,7 +200,8 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .world{position:absolute;left:0;top:0;background:#78b653;will-change:transform;transform-origin:0 0}
 .world.anim{transition:transform .35s ease}
 .map.s-spring .world{background:#86c560}.map.s-autumn .world{background:#a7a35a}.map.s-winter .world{background:#e4ebf2}
-.map.night .world{filter:brightness(.55) saturate(.85)}
+.mnight{position:absolute;inset:0;background:rgba(8,12,40,.45);opacity:0;transition:opacity 1.2s;pointer-events:none;z-index:4}
+.map.night .mnight{opacity:1}
 .road{position:absolute;background:#585d66}
 .road.h{box-shadow:inset 0 9px 0 #b9b5aa,inset 0 -9px 0 #b9b5aa}
 .road.v{box-shadow:inset 9px 0 0 #b9b5aa,inset -9px 0 0 #b9b5aa}
@@ -211,7 +212,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .park{position:absolute;background:#7cbb58;border-radius:10px;display:flex;flex-wrap:wrap;align-content:center;justify-content:space-around;font-size:30px;padding:6px}
 .map.s-winter .park{background:#f4f7fa}.map.s-autumn .park{background:#b0a659}
 .park .lbl{width:100%;text-align:center;font-size:11px;font-weight:900;color:#2b2f3a}
-.car,.walker{position:absolute;left:0;top:0;line-height:1;pointer-events:none;animation:linear infinite}
+.car,.walker{position:absolute;left:0;top:0;line-height:1;pointer-events:none;will-change:transform}
 .car{font-size:22px}.walker{font-size:13px}
 .car i,.walker i{display:inline-block;font-style:normal}
 
@@ -231,7 +232,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .shop .stag.forsale{background:#e74c3c}.shop .stag.pos{background:#1e7d46}.shop .stag.neg{background:#a33}.shop .stag.rent{background:var(--gold);color:#2a1d00}
 .shop .saddr{font-size:10px;color:#2b2f3a;text-align:center;font-weight:800;margin-top:2px;background:#ffffffbb;border-radius:4px}
 .shop.mine .sfront{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold),4px 6px 0 rgba(0,0,0,.18)}
-.shop:not(.mine) .sfront,.shop:not(.mine) .awn{filter:saturate(.35) brightness(.95)}
+.shop:not(.mine) .sfront{background:#e3ddd2}
 .shop .sbox{position:absolute;bottom:50px;left:-12px;font-size:16px;z-index:3}
 .mpad{position:absolute;right:10px;bottom:10px;z-index:5}
 .mpad button{width:42px;height:42px;background:#000b;color:#fff;border-radius:12px;font-size:20px;font-weight:900}
@@ -344,7 +345,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     <button class="mrep" id="mRep" style="display:none" onclick="openMgrReport()">🧑‍💼 Yönetici raporu<span id="mRepN"></span></button>
   </div>
   <div class="map" id="map" style="display:none">
-    <div class="world" id="world"></div>
+    <div class="world" id="world"></div><div class="mnight"></div>
     <div class="mhint">Parmağınla sürükleyerek gez · En ucuz dükkan sol üstte</div>
     <div class="mpad"><button onclick="panHome()" aria-label="Başa dön">⌂</button></div>
   </div>
@@ -536,7 +537,8 @@ function newGame(){
   setTimeout(()=>maybeTour(VIEW),0);
 }
 function continueGame(){ try{ S=JSON.parse(localStorage.getItem(SAVE)); if(!S||!S.blds) throw 0; }catch(e){ return newGame(); }
-  indexUnits(); ensureDefaults(); document.getElementById('start').style.display='none'; S.auto=false; render(); setTimeout(()=>maybeTour(VIEW),0); }
+  indexUnits(); ensureDefaults(); document.getElementById('start').style.display='none'; S.auto=false; render();
+  setTimeout(()=>maybeTour(VIEW).then(()=>{ if(!S.seenMgrIntro&&S.stats.bought>0){ const ob=S.blds.find(b=>b.units.some(u=>u.owned)&&!b.mgr); if(ob) mgrIntro(ob); } }),0); }
 function save(){ try{ localStorage.setItem(SAVE,JSON.stringify(S)); }catch(e){} }
 
 const baseRent=u=>TY(u).rent*u.pm, basePrice=u=>TY(u).price*u.pm, upkeep=u=>r100(TY(u).up*(u.pent?1.5:1));
@@ -577,7 +579,7 @@ function applyDay(){
   const rise=sn==='summer'?5.3:sn==='winter'?7:6, set=sn==='summer'?20.5:sn==='winter'?17.6:19.2;  // yazın gün uzun, kışın kısa
   const h=dayT*24; let i=0; while(SKY[i+1][0]<=h) i++;
   const a=SKY[i], b=SKY[i+1], k=(h-a[0])/(b[0]-a[0]);
-  document.getElementById('sky').style.background=`linear-gradient(${mix(a[1],b[1],k)},${mix(a[2],b[2],k)})`;
+  if(VIEW!=='shops') document.getElementById('sky').style.background=`linear-gradient(${mix(a[1],b[1],k)},${mix(a[2],b[2],k)})`;
   const sc=document.getElementById('scene'), sun=document.getElementById('sun'), moon=document.getElementById('moon');
   const up=h>=rise&&h<=set, night=h<rise+.2||h>=set+.4;
   sc.classList.toggle('night',night); document.getElementById('map').classList.toggle('night',night);
@@ -590,10 +592,12 @@ function applyDay(){
   const part = h<5?'Gece':h<11?'Sabah':h<15?'Öğle':h<18?'İkindi':h<21?'Akşam':'Gece';
   document.getElementById('hClock').innerHTML=`${night?'🌙':'☀️'} ${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}<small>${part}</small>`;
 }
+let lastApply=0;
 function dayLoop(now){
-  const dt=Math.min(.1,(now-lastF)/1000); lastF=now;
+  const dt=Math.min(.2,(now-lastF)/1000); lastF=now;
   dayT=(dayT+dt*(now<ffUntil?1/1.6:1/DAY_SEC))%1;
-  applyDay(); requestAnimationFrame(dayLoop);
+  if(now-lastApply>(now<ffUntil?40:125)){ lastApply=now; applyDay(); }   // telefonu yormamak için seyrek güncelle
+  requestAnimationFrame(dayLoop);
 }
 requestAnimationFrame(dayLoop);
 const passDay=()=>new Promise(r=>{ ffUntil=performance.now()+1600; setTimeout(r,1600); });
@@ -720,9 +724,9 @@ function handle0(e){
     log(`🏛️ Maliye yıl sonu: gelir vergisi ${fmt(gv)} + emlak vergisi ${fmt(et)} ödendi.`,'b');
     const lines=`${year()} yılı ev kiraları: <b>${fmt(yh)}</b>${ys?`<br>Dükkan gelirleri: <b>${fmt(ys)}</b>`:''}<br>Gelir vergisi (%10): <b>-${fmt(gv)}</b><br>Emlak vergisi: <b>-${fmt(et)}</b>`;
     const pFind=.4+(S.rep<40?.2:0)-(S.rep>=75?.15:0);
-    if(Math.random()>=pFind) return ask({ico:'🏛️',title:'Maliye yıl sonu denetimi',text:lines+'<br><br>✅ Defterlerin temiz çıktı, ceza yok.',choices:[{t:'Tamam'}]});
+    if(Math.random()>=pFind) return ask({noDismiss:true,ico:'🏛️',title:'Maliye yıl sonu denetimi',text:lines+'<br><br>✅ Defterlerin temiz çıktı, ceza yok.',choices:[{t:'Tamam'}]});
     const F=pick([{n:'Eksik kira beyanı',c:Math.max(6000,r100(yr*.2))},{n:'Faturasız tadilat gideri',c:9000+owned().length*800},{n:'Geç ödenen vergi faizi',c:Math.max(5000,r100((gv+et)*.4))},...(S.shops.some(x=>x.owned&&x.mode==='self')?[{n:'Dükkânda yazar kasa fişi kesilmemiş',c:12000+r100(ys*.05)}]:[])]);
-    return ask({ico:'🏛️',title:'Maliye denetimi: ceza!',text:lines+`<br><br>⚠️ Müfettiş bir sorun buldu: <b>${F.n}</b><br>Ceza: <b style="color:var(--bad)">${fmt(F.c)}</b>`,choices:[
+    return ask({noDismiss:true,ico:'🏛️',title:'Maliye denetimi: ceza!',text:lines+`<br><br>⚠️ Müfettiş bir sorun buldu: <b>${F.n}</b><br>Ceza: <b style="color:var(--bad)">${fmt(F.c)}</b>`,choices:[
       {t:'Cezayı öde',sub:`-${fmt(F.c)}`,fn:()=>{S.cash-=F.c;log(`🏛️ Maliye cezası (${F.n}): -${fmt(F.c)}`,'b');}},
       {t:'Mali müşavirle itiraz et',sub:'-4.000 ₺ · %50 ceza iptal olur, %50 ceza 1,5 katına çıkar',fn:()=>{S.cash-=4000; if(Math.random()<.5) log('🏛️ İtiraz kabul edildi, maliye cezası iptal!','g'); else { const c=r100(F.c*1.5); S.cash-=c; S.rep-=2; log(`🏛️ İtiraz reddedildi, ceza arttı: -${fmt(c)}`,'b'); }}}]});
   }
@@ -1020,7 +1024,7 @@ const SHOPS={
 };
 const SHOP_KEYS=['kahve','firin','berber','cicekci','kitap','fitness','butik','dondurma','oyuncak','eczane','hirdavat','market','restoran','teknoloji','veteriner'];
 const HROADS=['Çarşı Caddesi','Lale Sokak','Pazar Caddesi','Fırın Sokak'];
-const NB=3, BS=380, RW=70, WW=NB*BS+(NB+1)*RW, MAX_SAME=4, SHOP_REF=1500, STAFF_F=0.012;   // STAFF_F: kendin işletince çalışan maaşları (fiyatın oranı)
+const NB=3, BS=380, BH=232, RW=70, WW=NB*BS+(NB+1)*RW, WH=NB*BH+(NB+1)*RW, MAX_SAME=4, SHOP_REF=1500, STAFF_F=0.012;   // STAFF_F: kendin işletince çalışan maaşları (fiyatın oranı)
 const SHOP_BYE=['Daha büyük bir dükkâna geçti','İşini başka semte taşıdı','Emekli olup dükkânı kapattı','Ortağıyla yollarını ayırdı, dükkânı kapattı'];
 // 3x3 blok, her blokta 2 dükkan = 18 dükkan. Sol üst en ucuz, sağ alta doğru pahalanır; meydan (orta blok) daha işlek.
 function makeShops(){
@@ -1162,6 +1166,7 @@ function pickBiz(sh){ return new Promise(res=>{
   const cards=sh.opts.map(k=>{ const T=SHOPS[k], n=typeCount(k), full=n>=MAX_SAME, est=selfEstimate(sh,k);
     return `<button class="bizc ${full?'off':''}" data-k="${k}" ${full?'disabled':''}><span class="be">${T.e}</span><span class="bt"><b>${T.n}</b><small>${T.d}</small><small>🔑 Kiraya ver: ~${fmt(shopRentBase(sh,k))}/ay · 👨‍🍳 İşlet: ~${est>=0?'+':''}${fmt(est)}/ay</small><small>Sende: ${n}/${MAX_SAME}${full?' · sınır doldu':''}</small></span></button>`; }).join('');
   sheet(`<div class="evico">🏪</div><h2>Ne dükkânı olsun?</h2><p>📍 ${sh.addr}. Bu konum için üç seçenek var. Aynı türden en fazla ${MAX_SAME} dükkânın olabilir.</p>${cards}<button class="ch" id="later"><b>Sonra karar ver</b></button>`);
+  OV_DISMISS=dismissRes(res);
   ov.querySelectorAll('.bizc:not(.off)').forEach(b=>b.onclick=()=>{ sh.type=b.dataset.k; log(`🏪 ${sh.addr}: ${SHOPS[sh.type].e} ${SHOPS[sh.type].n} olacak.`,'g'); closeSheet(); render(); res(); });
   ov.querySelector('#later').onclick=()=>{ closeSheet(); res(); };
 });}
@@ -1179,6 +1184,7 @@ function pickMode(sh){ return new Promise(res=>{
     <button class="ch" id="mLease"><b>🔑 Kiraya ver</b><small>Bir esnafa kirala: düzenli ~${fmt(shopRentBase(sh))}/ay. Risk az, ama kiracıyı iyi seçmelisin.</small></button>
     <button class="ch" id="mSelf"><b>👨‍🍳 Kendin işlet</b><small>Açılış (dekor + ekipman): ${fmt(sc)}. Ciro ve giderler her ay değişir, ortalama ~${est>=0?'+':''}${fmt(est)}/ay. Kâr da zarar da senin.</small></button>
     <button class="ch" id="mLater"><b>Sonra karar ver</b><small>Dükkan boş bekler, aidatı ödenir</small></button>`);
+  OV_DISMISS=dismissRes(res);
   ov.querySelector('#mLease').onclick=()=>{ sh.mode='lease'; closeSheet(); chooseShopTenant(sh).then(()=>{render();res();}); };
   ov.querySelector('#mSelf').onclick=()=>{ if(!startSelf(sh)) return; closeSheet(); render(); res(); };
   ov.querySelector('#mLater').onclick=()=>{ closeSheet(); res(); };
@@ -1192,6 +1198,7 @@ function chooseShopTenant(sh){ return new Promise(res=>{
   const draw=()=>{
     sheet(`<h2>🔑 Dükkânına kiracı seç</h2><p>📍 ${shName(sh)} · ${sh.vacant?sh.vacant+' aydır boş':'boş'} · Kasa ${fmt(S.cash)}<br>Dükkan kiracısı seçmek daha önemli: kötü esnaf hem kirayı aksatır hem dükkânı yıpratır.</p>`+
       cands.map((c,i)=>candHTML(c,i,SHOP_REF)).join('')+`<button class="ch" id="skip"><b>Bu ay kimseyi seçme</b><small>Dükkan boş kalır</small></button>`);
+    OV_DISMISS=dismissRes(res);
     ov.querySelectorAll('[data-ref]').forEach(b=>b.onclick=()=>{ cands[+b.dataset.ref].checked=true; S.cash-=SHOP_REF; S.stats.refs++; renderHud(); draw(); });
     ov.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ const c=cands[+b.dataset.pick]; sh.tenant=c; sh.vacant=0; log(`🔑 ${c.name} ${shName(sh)} dükkânını kiraladı: ${fmt(c.rent)}/ay.`,'g'); closeSheet(); render(); res(); });
     ov.querySelector('#skip').onclick=()=>{ closeSheet(); res(); };
@@ -1262,42 +1269,30 @@ function setView(v){
   if(v==='shops'){ buildWorld(); lastMap=''; render(); clampPan(); maybeTour('shops'); }
   else { render(); if(S.mgrNew) toast(`🧑‍💼 Yöneticiler ${S.mgrNew} iş halletti, rapora bak`); maybeTour('homes'); }
 }
-const bx0=bx=>RW+bx*(BS+RW);
+const bx0=bx=>RW+bx*(BS+RW), by0=by=>RW+by*(BH+RW);
 function buildWorld(){
   if(worldBuilt) return; worldBuilt=true;
-  const w=document.getElementById('world'); w.style.width=WW+'px'; w.style.height=WW+'px';
+  const w=document.getElementById('world'); w.style.width=WW+'px'; w.style.height=WH+'px';
   let h='';
-  for(let k=0;k<=NB;k++){ const p=k*(BS+RW); h+=`<div class="road h" style="left:0;top:${p}px;width:${WW}px;height:${RW}px"></div><div class="road v" style="top:0;left:${p}px;height:${WW}px;width:${RW}px"></div>`; }
-  for(let a=0;a<=NB;a++)for(let b=0;b<=NB;b++) h+=`<div class="cross" style="left:${a*(BS+RW)}px;top:${b*(BS+RW)}px"></div>`;
-  const deco=[['🌳','🌲','🪑','🌳'],['🌷','🌳','🚲','🌳'],['🌳','⛲','🌳'],['🅿️','🚗','🚙'],['🌳','🌼','🌳','🪑'],['🌲','🌳','🌲']];
-  for(let by=0;by<NB;by++)for(let bx=0;bx<NB;bx++){
-    const x=bx0(bx), y=bx0(by), center=bx===1&&by===1;
-    h+=`<div class="blk" style="left:${x}px;top:${y}px;width:${BS}px;height:${BS}px"></div>`;
-    const d=center?['🌳','⛲','🌳']:deco[(bx*2+by*3)%deco.length];
-    h+=`<div class="park" style="left:${x+18}px;top:${y+228}px;width:${BS-36}px;height:${BS-246}px">${center?'<span class="lbl">MEYDAN</span>':''}${d.map(e=>`<span>${e}</span>`).join('')}</div>`;
-  }
-  const cars=['🚗','🚕','🚙','🚌','🚐','🛻'], ppl=['🚶','🚶‍♀️','🏃','🧑‍🦯','🚶‍♂️'];
+  for(let k=0;k<=NB;k++){ h+=`<div class="road h" style="left:0;top:${k*(BH+RW)}px;width:${WW}px;height:${RW}px"></div><div class="road v" style="top:0;left:${k*(BS+RW)}px;height:${WH}px;width:${RW}px"></div>`; }
+  for(let a=0;a<=NB;a++)for(let b=0;b<=NB;b++) h+=`<div class="cross" style="left:${a*(BS+RW)}px;top:${b*(BH+RW)}px"></div>`;
+  for(let by=0;by<NB;by++)for(let bx=0;bx<NB;bx++) h+=`<div class="blk" style="left:${bx0(bx)}px;top:${by0(by)}px;width:${BS}px;height:${BH}px"></div>`;
+  // Az sayıda araç ve yaya (telefonda akıcı olsun diye): her yatay yolda iki yönde birer araba + bir yaya, dikey yollarda birer araba
+  const cars=['🚗','🚕','🚙','🚌','🚐'], ppl=['🚶','🚶‍♀️','🚶‍♂️'];
   let n=0; const R=()=>{ n=(n*9301+49297)%233280; return n/233280; };
-  for(let k=0;k<=NB;k++){ const p=k*(BS+RW);
-    for(let j=0;j<2;j++){
-      const d=(14+R()*12).toFixed(1), del=(-R()*20).toFixed(1), c=cars[Math.floor(R()*cars.length)];
-      h+=`<span class="car x" style="--p:${p+40}px;--s:-60px;--e:${WW+60}px;animation-duration:${d}s;animation-delay:${del}s"><i style="transform:scaleX(-1)">${c}</i></span>`;
-      h+=`<span class="car x" style="--p:${p+12}px;--s:${WW+60}px;--e:-60px;animation-duration:${(+d+3).toFixed(1)}s;animation-delay:${(del-5).toFixed(1)}s"><i>${cars[Math.floor(R()*cars.length)]}</i></span>`;
-      h+=`<span class="car y" style="--p:${p+40}px;--s:-60px;--e:${WW+60}px;animation-duration:${(+d+2).toFixed(1)}s;animation-delay:${(del-2).toFixed(1)}s"><i style="transform:rotate(-90deg)">${cars[Math.floor(R()*cars.length)]}</i></span>`;
-      h+=`<span class="car y" style="--p:${p+12}px;--s:${WW+60}px;--e:-60px;animation-duration:${(+d+1).toFixed(1)}s;animation-delay:${(del-8).toFixed(1)}s"><i style="transform:rotate(90deg)">${cars[Math.floor(R()*cars.length)]}</i></span>`;
-    }
-    for(let j=0;j<3;j++){
-      const d=(38+R()*25).toFixed(1), del=(-R()*50).toFixed(1), right=R()<.5, e=ppl[Math.floor(R()*ppl.length)], side=R()<.5?p+1:p+RW-15;
-      h+=`<span class="walker x" style="--p:${side}px;--s:${right?-30:WW+30}px;--e:${right?WW+30:-30}px;animation-duration:${d}s;animation-delay:${del}s"><i style="${right?'transform:scaleX(-1)':''}">${e}</i></span>`;
-      const side2=R()<.5?p+1:p+RW-15, down=R()<.5;
-      h+=`<span class="walker y" style="--p:${side2}px;--s:${down?-30:WW+30}px;--e:${down?WW+30:-30}px;animation-duration:${(+d+6).toFixed(1)}s;animation-delay:${(del-9).toFixed(1)}s"><i>${ppl[Math.floor(R()*ppl.length)]}</i></span>`;
-    }
+  for(let k=0;k<=NB;k++){ const ph=k*(BH+RW), pv=k*(BS+RW), d=(16+R()*10).toFixed(1), del=(-R()*20).toFixed(1);
+    h+=`<span class="car x" style="--p:${ph+40}px;--s:-60px;--e:${WW+60}px;animation-duration:${d}s;animation-delay:${del}s"><i style="transform:scaleX(-1)">${cars[k%5]}</i></span>`;
+    h+=`<span class="car x" style="--p:${ph+12}px;--s:${WW+60}px;--e:-60px;animation-duration:${(+d+4).toFixed(1)}s;animation-delay:${(del-7).toFixed(1)}s"><i>${cars[(k+2)%5]}</i></span>`;
+    h+= k%2 ? `<span class="car y" style="--p:${pv+40}px;--s:-60px;--e:${WH+60}px;animation-duration:${(+d-3).toFixed(1)}s;animation-delay:${(del-3).toFixed(1)}s"><i style="transform:rotate(-90deg)">${cars[(k+1)%5]}</i></span>`
+            : `<span class="car y" style="--p:${pv+12}px;--s:${WH+60}px;--e:-60px;animation-duration:${(+d-3).toFixed(1)}s;animation-delay:${(del-3).toFixed(1)}s"><i style="transform:rotate(90deg)">${cars[(k+1)%5]}</i></span>`;
+    const right=k%2===0, side=right?ph+1:ph+RW-15;
+    h+=`<span class="walker x" style="--p:${side}px;--s:${right?-30:WW+30}px;--e:${right?WW+30:-30}px;animation-duration:${(40+R()*15).toFixed(1)}s;animation-delay:${(-R()*40).toFixed(1)}s"><i style="${right?'transform:scaleX(-1)':''}">${ppl[k%3]}</i></span>`;
   }
   h+='<div id="shopsLayer"></div>';
   w.innerHTML=h;
   w.querySelectorAll('.car,.walker').forEach(el=>{
     const st=el.style, a=parseFloat(st.getPropertyValue('--s')), b=parseFloat(st.getPropertyValue('--e')), p=parseFloat(st.getPropertyValue('--p')), y=el.classList.contains('y');
-    const dur=parseFloat(st.animationDuration)*1000, del=parseFloat(st.animationDelay)*1000, T=v=>y?`translate(${p}px,${v}px)`:`translate(${v}px,${p}px)`;
+    const dur=parseFloat(st.animationDuration)*1000, del=parseFloat(st.animationDelay)*1000, T=v=>y?`translate3d(${p}px,${v}px,0)`:`translate3d(${v}px,${p}px,0)`;
     el.style.animation='none'; el.style.transform=T(a);
     if(el.animate) el.animate([{transform:T(a)},{transform:T(b)}],{duration:dur,delay:del,iterations:Infinity,easing:'linear'});
   });
@@ -1311,15 +1306,15 @@ function buildWorld(){
 }
 function clampPan(){
   const m=document.getElementById('map').getBoundingClientRect(), w=document.getElementById('world');
-  const Z=clamp(m.width/560,.58,1), E=WW*Z;   // telefonda harita küçülür, daha geniş alan görünür
+  const Z=clamp(m.width/560,.58,1), E=WW*Z, EH=WH*Z;   // telefonda harita küçülür, daha geniş alan görünür
   PX = m.width>=E ? (m.width-E)/2 : clamp(PX,m.width-E,0);
-  PY = m.height>=E ? (m.height-E)/2 : clamp(PY,m.height-E,0);
+  PY = m.height>=EH ? (m.height-EH)/2 : clamp(PY,m.height-EH,0);
   w.style.transform=`translate(${PX}px,${PY}px) scale(${Z})`;
 }
 function panBy(dx,dy){ const w=document.getElementById('world'); w.classList.add('anim'); PX+=dx; PY+=dy; clampPan(); }
 function panHome(){ const w=document.getElementById('world'); w.classList.add('anim'); PX=0; PY=0; clampPan(); }
 function shopHTML(sh){
-  const T=sh.type?SHOPS[sh.type]:null, x=bx0(sh.bx)+(sh.slot?BS-172:22), y=bx0(sh.by)+18;
+  const T=sh.type?SHOPS[sh.type]:null, x=bx0(sh.bx)+(sh.slot?BS-172:22), y=by0(sh.by)+22;
   const mv=SHMOV[sh.id]&&Date.now()-SHMOV[sh.id]<5000;
   let who='', st='', cls='';
   if(!sh.owned){ st=`SATILIK · ${fmtK(sh.price)}`; cls='forsale'; }
@@ -1470,8 +1465,8 @@ const taskWhere=tk=>tk.uid!=null?uname(U(tk.uid)):tk.shid!=null?shName(S.shops[t
 async function openTask(id){
   if(busy) return; const tk=S.tasks.find(x=>x.id===id); if(!tk) return;
   if(!taskValid(tk)){ S.tasks=S.tasks.filter(x=>x!==tk); render(); return; }
-  busy=true; render();
-  try{ await handle(taskEvent(tk)); } finally { S.tasks=S.tasks.filter(x=>x.id!==id); busy=false; save(); render(); }
+  busy=true; S._dismissed=false; render();
+  try{ await handle(taskEvent(tk)); } finally { if(!S._dismissed) S.tasks=S.tasks.filter(x=>x.id!==id); S._dismissed=false; busy=false; save(); render(); }
 }
 function openTaskFor(kind,id,ev){ if(ev) ev.stopPropagation(); const tk=S.tasks.find(x=>kind==='u'?x.uid===id:x.shid===id); if(tk) openTask(tk.id); }
 async function autoResolve(e,pick,info){ S._auto={pick,info}; try{ await handle(e); } finally { S._auto=null; } }
@@ -1518,16 +1513,22 @@ const bldOpen=b=>b.id<unlockedCount();
 
 // ================= PENCERELER =================
 const ov=document.getElementById('ov');
-function sheet(html){ const st=ov.querySelector('.sheet')?.scrollTop||0, again=ov.classList.contains('on');
-  ov.innerHTML=`<div class="sheet" ${again?'style="animation:none"':''}>${html}</div>`; ov.classList.add('on'); if(again) ov.firstChild.scrollTop=st; }
-function closeSheet(){ ov.classList.remove('on'); ov.innerHTML=''; }
+// Pencerenin dışındaki boşluğa dokununca kapanır. onDismiss: kapanınca ne olacağı (false = kapanmaz, ör. maliye)
+let OV_DISMISS=null;
+function sheet(html,onDismiss){ const st=ov.querySelector('.sheet')?.scrollTop||0, again=ov.classList.contains('on');
+  ov.innerHTML=`<div class="sheet" ${again?'style="animation:none"':''}>${html}</div>`; ov.classList.add('on'); if(again) ov.firstChild.scrollTop=st;
+  OV_DISMISS = onDismiss===false ? null : (onDismiss||closeSheet); }
+function closeSheet(){ ov.classList.remove('on'); ov.innerHTML=''; OV_DISMISS=null; }
+ov.addEventListener('click',e=>{ if(e.target===ov && OV_DISMISS) OV_DISMISS(); });
+const dismissRes=res=>()=>{ closeSheet(); S._dismissed=true; render(); res(); };   // karar vermeden kapatıldı: iş kartı listede kalır
 function ask(spec){ return new Promise(res=>{
   if(S._mgr){ const i=mgrPick(spec), c=spec.choices[i]; c.fn&&c.fn(); S.rep=clamp(S.rep,0,100);
     mgrNote(S._mgr.b, `${strip(spec.title)} → ${c.t}${c.sub?' ('+strip(c.sub)+')':''}`); return res(); }
   if(S._auto){ const n=spec.choices.length; let i=S._auto.pick; if(i==null||i<0||i>=n) i=n-1; const c=spec.choices[i]; c.fn&&c.fn(); S.rep=clamp(S.rep,0,100);
     bell(S._auto.info ? `${spec.ico||''} ${strip(spec.title)} · ${strip(spec.text).slice(0,170)}` : `⏰ Süresi doldu: ${strip(spec.title)} → ${c.t}`); return res(); }
   if(S._fast){ const c=spec.choices[S._fastPick?Math.random()*spec.choices.length|0:0]; c.fn&&c.fn(); S.rep=clamp(S.rep,0,100); return res(); }
-  sheet(`<div class="evico">${spec.who?personSVG(spec.who,72):spec.ico}</div><h2>${spec.who?spec.ico+' ':''}${spec.title}</h2><p>${spec.text}</p>`+spec.choices.map((c,i)=>`<button class="ch" data-i="${i}"><b>${c.t}</b>${c.sub?`<small>${c.sub}</small>`:''}</button>`).join(''));
+  sheet(`<div class="evico">${spec.who?personSVG(spec.who,72):spec.ico}</div><h2>${spec.who?spec.ico+' ':''}${spec.title}</h2><p>${spec.text}</p>`+spec.choices.map((c,i)=>`<button class="ch" data-i="${i}"><b>${c.t}</b>${c.sub?`<small>${c.sub}</small>`:''}</button>`).join(''),
+    spec.noDismiss?false:dismissRes(res));
   ov.querySelectorAll('.ch').forEach(b=>b.onclick=()=>{ closeSheet(); const c=spec.choices[+b.dataset.i]; c.fn&&c.fn(); S.rep=clamp(S.rep,0,100); render(); res(); });
 });}
 const seg=v=>{const n=Math.round(clamp(v,0,1)*5);return `<div class="seg5 ${n<=2?'low':n===3?'mid':''}">${[0,1,2,3,4].map(i=>`<i class="${i<n?'on':''}"></i>`).join('')}</div>`;};
@@ -1559,6 +1560,7 @@ function chooseTenant(u){ return new Promise(res=>{
   const draw=()=>{
     sheet(`<h2>🔑 Kiracı seç</h2><p>📍 ${uname(u)} · ${u.vacant>0?u.vacant+' aydır boş':'boş'} · Durum %${Math.round(u.cond)} · Kasa ${fmt(S.cash)}<br>İlk izlenim yanıltabilir. Referans kontrolü gerçek karakteri gösterir.</p>`+
       cands.map(candHTML).join('')+`<button class="ch" id="skip"><b>Bu ay kimseyi seçme</b><small>Ev boş kalır, gelecek ay yeni adaylar gelir</small></button>`);
+    OV_DISMISS=dismissRes(res);
     ov.querySelectorAll('[data-ref]').forEach(b=>b.onclick=()=>{ const c=cands[+b.dataset.ref]; S.cash-=REF_COST; c.checked=true; S.stats.refs++; renderHud(); draw(); });
     ov.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{ const c=cands[+b.dataset.pick]; u.tenant=c; u.vacant=0; log(`${c.ic} ${c.name} (${c.job}) ${uname(u)} için kiracın oldu: ${fmt(c.rent)}/ay.`,'g'); closeSheet(); render(); res(); });
     ov.querySelector('#skip').onclick=()=>{ closeSheet(); res(); };
@@ -1570,8 +1572,20 @@ function buy(u,price,fromEvent){
   log(`🎉 ${uname(u)} satın alındı: ${fmt(price)}`,'g');
   render();
   if(owned().length>=GOAL) win();
-  if(!fromEvent){ busy=true; chooseTenant(u).then(()=>{busy=false;save();render();}); }
-  else S._pendingFind=u;
+  if(!fromEvent){ busy=true; chooseTenant(u).then(()=>{ busy=false; save(); render(); mgrIntro(B(u)); }); }
+  else { S._pendingFind=u; setTimeout(()=>{ if(!busy) mgrIntro(B(u)); },400); }
+}
+// İlk satın almadan hemen sonra (bir kez) yönetici kavramını tanıtır; oyuncu yöneticiyle geç tanışıp sıkılmasın
+function mgrIntro(b){
+  if(S.seenMgrIntro||S._fast||busy) return; S.seenMgrIntro=true; save();
+  const open=mgrOpen();
+  sheet(`<div class="evico">🧑‍💼</div><h2>Yöneticiyle tanış</h2>
+    <p>Mülkün arttıkça kiracı aramak, arızalar ve şikâyetler seni yorabilir. Her binaya bir <b>yönetici</b> atayabilirsin:</p>
+    <div class="kv"><span>🔑 Boş eve kiracı bulur</span><span></span><span>🔧 Arıza, şikâyet ve kira sorunlarını çözer</span><span></span><span>💰 Kirayı senin yerine toplar</span><span></span><span>📋 Yaptıklarını raporlar</span><span></span></div>
+    <p>Karşılığında topladığı kiranın <b>%6–12</b>'sini alır. Yöneticili binadan sana iş kartı gelmez; ne yaptığını Evler ekranındaki <b>🧑‍💼 Yönetici raporu</b>nda görürsün.${open?'':` Yöneticiler <b>seviye ${MGR_LEVEL}</b>'da açılır.`}</p>
+    ${open?`<button class="ch" id="miGo"><b>🧑‍💼 ${b.name} için yönetici seç</b><small>Çırak, deneyimli ya da yönetim şirketi</small></button>`:''}
+    <button class="ch" onclick="closeSheet()"><b>${open?'Şimdilik ben ilgilenirim':'Tamam'}</b><small>İstediğin zaman binaya dokunup "Yönetici ata" diyebilirsin</small></button>`);
+  const g=ov.querySelector('#miGo'); if(g) g.onclick=()=>{ closeSheet(); openMgrPicker(b.id); };
 }
 const unitTags=u=>[u.pent?'🌇 Teraslı çatı katı':null, isApt(B(u))&&!u.pent?`${u.f===0?'Zemin kat':u.f+'. kat'}`:null, u.ac?'❄️ Klimalı':null, u.insul?'🛡️ Çatı izolasyonlu':null, isTop(u)&&!u.insul?'⚠️ En üst kat: yağmurda sızabilir':null].filter(Boolean);
 function openBuilding(bi){
